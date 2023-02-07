@@ -24,7 +24,7 @@ pipeline {
  */
         stage('Build') {
             steps {
-                dir("/var/lib/jenkins/workspace/MAVENBUILD") {
+                dir("/var/lib/jenkins/workspace/pet-jenkinsfile_main") {
                          sh './mvnw package'
                          
                 }
