@@ -40,19 +40,9 @@ pipeline {
                  timeout(time: 2, unit: 'MINUTES') {
                               waitForQualityGate abortPipeline: true
         }
-/*      }
+      }
     }
-  }
-       stage('Jfrog Upload') {
-             steps {
-                dir("/var/lib/jenkins/workspace/MAVENBUILD/target") {
-                sh 'jfrog c add --artifactory-url="https://swagatamjfrog.jfrog.io/artifactory/" --user="demo" --password="AKCp8mYy3yf14htMsfrogKCdsV9F16Kb7BuLMYSvoBpZPJcR6hWVwjgm1E69Wmb8FKuKQxATP"  --interactive="false"'
-                 sh 'jfrog rt u "spring-petclinic-2.6.0-SNAPSHOT.jar" "test/pring-petclinic-2.6.0-SNAPSHOT-$BUILD_NUMBER.jar" --recursive=false'
-               
-                }
-            }
-        }  
-  */          
+  }     
         stage('Test') {
             steps {
                 dir("/var/lib/jenkins/workspace/MAVENBUILD") {
