@@ -43,7 +43,7 @@ pipeline {
       }
     }
   }
-        stage('Jfrog Upload') {
+ /*       stage('Jfrog Upload') {
              steps {
                 dir("/var/lib/jenkins/workspace/MAVENBUILD/target") {
                 sh 'jfrog c add --artifactory-url="https://swagatamjfrog.jfrog.io/artifactory/" --user="demo" --password="AKCp8mYy3yf14htMsfrogKCdsV9F16Kb7BuLMYSvoBpZPJcR6hWVwjgm1E69Wmb8FKuKQxATP"  --interactive="false"'
@@ -51,7 +51,7 @@ pipeline {
                
                 }
             }
-        }  
+  */      }  
             
         stage('Test') {
             steps {
