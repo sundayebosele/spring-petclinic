@@ -51,13 +51,7 @@ pipeline {
             }
         }
         
-     stage('Delete Container and Image') {
-      steps{
-        sh 'docker ps -a|egrep -i "$registry|$IMAGE_REPO_NAME" |awk \'{print $1}\' |xargs docker rm -f || true'
-        sh 'docker images | egrep -i "$registry|$IMAGE_REPO_NAME" | awk \'{print $3}\' |grep -v IMAGE|xargs docker rmi -f || true'
-               
-      }
-    }  
+
      stage('Building DockerHub image') {
       steps{
         script {
