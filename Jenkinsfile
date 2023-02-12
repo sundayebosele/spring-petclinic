@@ -45,7 +45,7 @@ pipeline {
   }     
         stage('Test') {
             steps {
-                dir("/var/lib/jenkins/workspace/MAVENBUILD") {
+                dir("/var/lib/jenkins/workspace/petclinic_dev") {
                     sh 'mvn test'
                 }
             }
