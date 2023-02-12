@@ -32,7 +32,7 @@ pipeline {
       stage('Sonarqube') {
         
            steps {
-               dir("/var/lib/jenkins/workspace/MAVENBUILD") {
+               dir("/var/lib/jenkins/workspace/petclinic_dev") {
                 withSonarQubeEnv('sonar') {
                       sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar'
                       
