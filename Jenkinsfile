@@ -1,10 +1,10 @@
 pipeline {
     environment {
-    registry = "swagatam04/spring-petclinic"
+    registry = "selectdata/spring-petclinic"
     registryCredential = 'dockerhub'
-    AWS_ACCOUNT_ID="098974694488"
-    AWS_DEFAULT_REGION="us-east-2" 
-    IMAGE_REPO_NAME="demo"
+    AWS_ACCOUNT_ID="013116333349"
+    AWS_DEFAULT_REGION="us-east-1" 
+    IMAGE_REPO_NAME="selectdata"
     REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
    
     
