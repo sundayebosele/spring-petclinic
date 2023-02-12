@@ -1,6 +1,6 @@
 pipeline {
     environment {
-    registry = "selectdata/spring-petclinic"
+    registry = "selectdata"
     registryCredential = 'dockerhub'
     AWS_ACCOUNT_ID="013116333349"
     AWS_DEFAULT_REGION="us-east-1" 
@@ -54,7 +54,6 @@ pipeline {
 
      stage('Building DockerHub image') {
       steps{
-        script {
           dockerImage = docker.build registry + ":$BUILD_NUMBER"
         }
       }
