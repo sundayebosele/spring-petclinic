@@ -1,102 +1,50 @@
 pipeline {
-    environment {
-    registry = "selectdata"
-    registryCredential = 'dockerhub'
-    AWS_ACCOUNT_ID="013116333349"
-    AWS_DEFAULT_REGION="us-east-1" 
-    IMAGE_REPO_NAME="selectdata"
-    REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
-   
-    
-  }
-    agent any
-    tools {
-        maven "maven"
-    }
-    stages {
-        stage('Initialize'){
-            steps{
-                echo "PATH = ${M2_HOME}/bin:${PATH}"
-                echo "M2_HOME = /opt/apache-maven-3.8.2"
-                
-            }
-        }
-        stage('Build') {
-            steps {
-                dir("/var/lib/jenkins/workspace/petclinic_dev") {
-                         sh './mvnw package'
-                         
-                }
-            }
-        }  
-      stage('Sonarqube') {
-        
-           steps {
-               dir("/var/lib/jenkins/workspace/petclinic_dev") {
-                withSonarQubeEnv('sonar') {
-                      sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar'
-                      
-                }
-                 timeout(time: 10, unit: 'MINUTES') {
-                              waitForQualityGate abortPipeline: true
-        }
-      }
-    }
-  }     
-        stage('Test') {
-            steps {
-                dir("/var/lib/jenkins/workspace/petclinic_dev") {
-                    sh 'mvn test'
-                }
-            }
-        }
-        
+agent any
+environment {
+    DOCKER_HUB_USERNAME = credentials('docker_hub_username')
+    DOCKER_HUB_PASSWORD = credentials('docker_hub_password')
+}
 
-     stage('Building DockerHub image') {
-      steps{
-        script {
-          dockerImage = docker.build registry + ":$BUILD_NUMBER"        }
-      }
-    }
-    stage('Push Image to DockerHub') {
-      steps{
-        script {
-          docker.withRegistry( '', registryCredential ) {
-            dockerImage.push()
-          }
+stages {
+    stage('Build') {
+        steps {
+            sh 'mvn clean install'
         }
-      }
     }
-        
-    stage('Building ECR image') {
-      steps{
-        script {
-          dockerImageAws = docker.build REPOSITORY_URI + ":$BUILD_NUMBER"
-        }
-      }
-    }
-     stage('Deploy to AWS ECR') {
-            steps {
-                script{
-                    docker.withRegistry('https://098974694488.dkr.ecr.us-east-2.amazonaws.com', 'ecr:us-east-2:awscred') {
-                    dockerImageAws.push()
-                    
-                    }
-                }
+    stage('SonarQube Analysis') {
+        steps {
+            withSonarQubeEnv('SonarQube') {
+                sh 'mvn sonar:sonar'
             }
         }
-   
-    stage('Start Container') {
-      steps{
-        sh 'docker run -itd -p 8080:8080 -e "SPRING_PROFILES_ACTIVE=postgres"  --link spring-petclinic_petclinic-db.default.svc.cluster.local_1:petclinic-db.default.svc.cluster.local --network spring-petclinic_default $registry:$BUILD_NUMBER'
-                
-      }
     }
-  
-   stage('Cleanup Working Directory') {
-            steps{
-                cleanWs deleteDirs: true
-            }
+    stage('Archive Artifacts') {
+        steps {
+            archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
         }
-  }
+    }
+    stage('Docker Build') {
+        steps {
+            sh 'docker build -t my-java-app .'
+        }
+    }
+    stage('Docker Push') {
+        steps {
+            sh 'docker login -u "$DOCKER_HUB_USERNAME" -p "$DOCKER_HUB_PASSWORD"'
+            sh 'docker push my-java-app'
+        }
+    }
+    stage('Trivy Scan') {
+        steps {
+            sh 'trivy my-java-app'
+        }
+    }
+    stage('Deploy to EC2') {
+        steps {
+            sh 'aws ec2 run-instances --image-id ami-0c55b159cbfafe1f0 --count 1 --instance-type t2.micro --key-name MyKeyPair --security-group-ids sg-0123456789abcdef0 --subnet-id subnet-0123456789abcdef0'
+            sh 'aws ec2 describe-instances --query "Reservations[*].Instances[*].PublicIpAddress" --output=text > ec2_instance_ip.txt'
+            sh 'DOCKER_HOST_IP=$(cat ec2_instance_ip.txt)'
+            sh 'docker -H tcp://$DOCKER_HOST_IP:2375 run -d -p 8080:8080 my-java-app'
+        }
+    }
 }
