@@ -1,6 +1,6 @@
 pipeline {
 agent any
-environment {
+ environment {
     DOCKER_HUB_USERNAME = credentials('docker_hub_username')
     DOCKER_HUB_PASSWORD = credentials('docker_hub_password')
 }
