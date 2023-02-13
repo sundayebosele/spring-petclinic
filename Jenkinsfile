@@ -55,7 +55,8 @@ pipeline {
      stage('Building DockerHub image') {
       steps{
         script {
-          dockerImage = docker.build registry + ":$BUILD_NUMBER"        }
+            sh 'docker build -t my-java-app .'
+        }
       }
     }
     stage('Push Image to DockerHub') {
