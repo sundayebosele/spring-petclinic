@@ -18,7 +18,6 @@ pipeline {
             steps{
                 echo "PATH = ${M2_HOME}/bin:${PATH}"
                 echo "M2_HOME = /opt/apache-maven-3.8.2"
-                
             }
         }
         stage('Build') {
@@ -30,7 +29,6 @@ pipeline {
             }
         }  
       stage('Sonarqube') {
-        
            steps {
                dir("/var/lib/jenkins/workspace/petclinic_dev") {
                 withSonarQubeEnv('sonar') {
